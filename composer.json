@@ -1,0 +1,25 @@
+{
+    "name": "sunchaser/doctrine-pgsql-ip",
+    "description": "Doctrine type handlers for PostgreSQL's inet and cidr",
+    "keywords": ["doctrine", "postgresql", "ip address", "inet", "cidr"],
+    "type": "library",
+    "license": "ISC",
+    "authors": [
+        {
+            "name": "Christian Archer",
+            "email": "sunchaser@sunchaser.info"
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "SunChaser\\Doctrine\\PgSql\\": "src"
+        }
+    },
+    "require": {
+        "doctrine/dbal": "^2.0",
+        "leth/ip-address": "^1.0"
+    }
+}
