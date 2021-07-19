@@ -20,7 +20,7 @@
     },
     "require": {
         "php": ">= 5.5",
-        "doctrine/dbal": "^2.0",
+        "doctrine/dbal": "^2.0 || ^3.0",
         "leth/ip-address": "^1.0"
     }
 }
