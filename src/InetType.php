@@ -38,7 +38,9 @@ class InetType extends Type
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if ($value instanceof Address || $value instanceof NetworkAddress) {
+        if ($value === null) {
+            return null;
+        } elseif ($value instanceof Address || $value instanceof NetworkAddress) {
             return strval($value);
         }
 
