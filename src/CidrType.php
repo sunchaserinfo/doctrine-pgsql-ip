@@ -33,7 +33,9 @@ class CidrType extends Type
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if ($value instanceof NetworkAddress) {
+        if ($value === null) {
+            return null;
+        } elseif ($value instanceof NetworkAddress) {
             return strval($value->get_network_start()) . '/' . strval($value->get_cidr());
         }
 
