@@ -15,6 +15,7 @@ class InetType extends Type
 
     /**
      * @inheritDoc
+     * @return Address|NetworkAddress|null
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -35,6 +36,7 @@ class InetType extends Type
 
     /**
      * @inheritDoc
+     * @return string|null
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
@@ -53,6 +55,7 @@ class InetType extends Type
 
     /**
      * @inheritDoc
+     * @return string
      */
     public function getSQLDeclaration(array $column, AbstractPlatform $platform)
     {
@@ -61,6 +64,7 @@ class InetType extends Type
 
     /**
      * @inheritDoc
+     * @return string
      */
     public function getName()
     {
