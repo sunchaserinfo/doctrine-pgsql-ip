@@ -1,0 +1,8 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: T3cLgUr9KepiNmHXC9sBKs7b
+    ports:
+      - "127.0.0.1:2345:5432"
