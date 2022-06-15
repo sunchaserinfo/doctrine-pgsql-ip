@@ -1,73 +1,67 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SunChaser\Doctrine\PgSql;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
-use Leth\IPAddress\IP\Address;
-use Leth\IPAddress\IP\NetworkAddress;
+use PhpIP\IP;
+use PhpIP\IPBlock;
 
-class InetType extends Type
+final class InetType extends Type
 {
-    const INET = 'inet';
+    public const PG_TYPE = 'inet';
+    public const NAME = self::PG_TYPE;
 
     /**
      * @inheritDoc
-     * @return Address|NetworkAddress|null
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): IP|IPBlock|null
     {
-        if ($value === null || $value instanceof Address || $value instanceof NetworkAddress) {
+        if ($value === null || $value instanceof IP || $value instanceof IPBlock) {
             return $value;
         }
 
         try {
-            if (strpos($value, '/') !== false) {
-                return NetworkAddress::factory($value);
-            } else {
-                return Address::factory($value);
-            }
+            return str_contains($value, '/') ? IPBlock::create($value) : IP::create($value);
         } catch (InvalidArgumentException $e) {
-            throw ConversionException::conversionFailed($value, $this->getName());
+            throw ConversionException::conversionFailed($value, $this->getName(), $e);
         }
     }
 
     /**
      * @inheritDoc
-     * @return string|null
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
-        if ($value === null) {
-            return null;
-        } elseif ($value instanceof Address || $value instanceof NetworkAddress) {
-            return strval($value);
-        }
-
-        throw ConversionException::conversionFailedInvalidType(
-            $value,
-            $this->getName(),
-            ['null', Address::class, NetworkAddress::class]
-        );
+        return match (true) {
+            $value === null => null,
+            $value instanceof IP => $value->humanReadable(),
+            $value instanceof IPBlock => $value->withPrefixLength(),
+            default => throw ConversionException::conversionFailedInvalidType(
+                $value,
+                $this->getName(),
+                ['null', IP::class, IPBlock::class]
+            )
+        };
     }
 
     /**
      * @inheritDoc
-     * @return string
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return $platform->getDoctrineTypeMapping(static::INET);
+        return $platform->getDoctrineTypeMapping(self::PG_TYPE);
     }
 
     /**
      * @inheritDoc
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
-        return static::INET;
+        return self::NAME;
     }
 }

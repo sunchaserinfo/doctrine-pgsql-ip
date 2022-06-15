@@ -1,68 +1,65 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SunChaser\Doctrine\PgSql;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
-use Leth\IPAddress\IP\NetworkAddress;
+use PhpIP\IPBlock;
 
-class CidrType extends Type
+final class CidrType extends Type
 {
-    const CIDR = 'cidr';
+    public const PG_TYPE = 'cidr';
+    public const NAME = self::PG_TYPE;
 
     /**
      * @inheritDoc
-     * @return NetworkAddress|null
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?IPBlock
     {
-        if ($value === null || $value instanceof NetworkAddress) {
+        if ($value === null || $value instanceof IPBlock) {
             return $value;
         }
 
         try {
-            return NetworkAddress::factory($value);
+            return IPBlock::create($value);
         } catch (InvalidArgumentException $e) {
-            throw ConversionException::conversionFailed($value, $this->getName());
+            throw ConversionException::conversionFailed($value, $this->getName(), $e);
         }
     }
 
     /**
      * @inheritDoc
-     * @return string|null
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
-        if ($value === null) {
-            return null;
-        } elseif ($value instanceof NetworkAddress) {
-            return strval($value->get_network_start()) . '/' . strval($value->get_cidr());
-        }
-
-        throw ConversionException::conversionFailedInvalidType(
-            $value,
-            $this->getName(),
-            ['null', NetworkAddress::class]
-        );
+        return match (true) {
+            $value === null => null,
+            $value instanceof IPBlock => $value->withPrefixLength(),
+            default => throw ConversionException::conversionFailedInvalidType(
+                $value,
+                $this->getName(),
+                ['null', IPBlock::class]
+            ),
+        };
     }
 
     /**
      * @inheritDoc
-     * @return string
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return $platform->getDoctrineTypeMapping(static::CIDR);
+        return $platform->getDoctrineTypeMapping(self::PG_TYPE);
     }
 
     /**
      * @inheritDoc
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
-        return static::CIDR;
+        return self::NAME;
     }
 }
