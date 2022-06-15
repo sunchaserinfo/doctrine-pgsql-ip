@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.0.0
+
+* PHP 8.0 is now required
+* DBAL 3.0 is now required
+* IP library was changed from `leth/ip-address` to `rlanvin/php-ip`
+
 ## 1.1.2
 
 * Fix Symfony deprecations by adding @return annotations (#2) Thanks to @moesoha
