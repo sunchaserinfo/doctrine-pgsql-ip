@@ -1,8 +1,8 @@
 # IP Address types for Doctrine
 
-This library adds support for `cidr` and `inet` types of PostgreSQL in Doctrine using the [leth/ip-address] library.
+This library adds support for `cidr` and `inet` types of PostgreSQL in Doctrine using the [rlanvin/php-ip] library.
 
-[leth/ip-address]: https://packagist.org/packages/leth/ip-address
+[rlanvin/php-ip]: https://github.com/rlanvin/php-ip
 
 ## Installation
 
@@ -14,9 +14,13 @@ This library adds support for `cidr` and `inet` types of PostgreSQL in Doctrine 
 
    ```php
    <?php
+   
+   use Doctrine\DBAL\Types\Type;
+   use SunChaser\Doctrine\PgSql\InetType;
+   use SunChaser\Doctrine\PgSql\CidrType;
 
-   \Doctrine\DBAL\Types\Type::addType('inet', \SunChaser\Doctrine\PgSql\InetType::class);
-   \Doctrine\DBAL\Types\Type::addType('cidr', \SunChaser\Doctrine\PgSql\CidrType::class);
+   Type::addType(InetType::NAME, InetType::class);
+   Type::addType(CidrType::NAME, CidrType::class);
    ```
 
 2. Add type handling for schema operations
@@ -24,14 +28,24 @@ This library adds support for `cidr` and `inet` types of PostgreSQL in Doctrine 
    ```php
    <?php
 
-   $conn = $em->getConnection();
-   $conn->getDatabasePlatform()->registerDoctrineTypeMapping('inet', 'inet');
-   $conn->getDatabasePlatform()->registerDoctrineTypeMapping('cidr', 'cidr');
+   use Doctrine\DBAL\Connection;
+   use SunChaser\Doctrine\PgSql\InetType;
+   use SunChaser\Doctrine\PgSql\CidrType;
+   
+   /** @var Connection $conn */
+   $conn->getDatabasePlatform()->registerDoctrineTypeMapping(InetType::PG_TYPE, InetType::NAME);
+   $conn->getDatabasePlatform()->registerDoctrineTypeMapping(CidrType::PG_TYPE, CidrType::NAME);
    ```
 
-`inet` accepts and retrieves both `\Leth\IPAddress\IP\Address` for individual addresses
-and `\Leth\IPAddress\IP\NetworkAddress` for network masks.
+`inet` accepts and retrieves both `\PhpIP\IP` for individual addresses
+and `\PhpIP\IPBlock` for network masks.
 Please check the type when retrieving the data.
 
-`cidr` accepts and retrieves only `\Leth\IPAddress\IP\NetworkAddress`.
-All nonzero bits to the right of the netmask will be discarded on save.
+`cidr` accepts and retrieves only `\PhpIP\IPBlock`.
+
+## Upgrade
+
+Changes in 2.0:
+
+* `leth/ip-address` was replaced with `rlanvin/php-ip`
+* Requirements were bumped to PHP 8.0 and Doctrine DBAL 3.0
