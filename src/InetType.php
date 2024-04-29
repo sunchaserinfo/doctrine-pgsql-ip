@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace SunChaser\Doctrine\PgSql;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidType;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 use PhpIP\IP;
@@ -28,7 +29,7 @@ final class InetType extends Type
         try {
             return str_contains($value, '/') ? IPBlock::create($value) : IP::create($value);
         } catch (InvalidArgumentException $e) {
-            throw ConversionException::conversionFailed($value, $this->getName(), $e);
+            throw ValueNotConvertible::new($value, self::NAME, null, $e);
         }
     }
 
@@ -41,11 +42,7 @@ final class InetType extends Type
             $value === null => null,
             $value instanceof IP => $value->humanReadable(),
             $value instanceof IPBlock => $value->withPrefixLength(),
-            default => throw ConversionException::conversionFailedInvalidType(
-                $value,
-                $this->getName(),
-                ['null', IP::class, IPBlock::class]
-            )
+            default => throw InvalidType::new($value, self::NAME, ['null', IP::class, IPBlock::class])
         };
     }
 
@@ -55,13 +52,5 @@ final class InetType extends Type
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getDoctrineTypeMapping(self::PG_TYPE);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::NAME;
     }
 }

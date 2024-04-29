@@ -16,9 +16,10 @@ require __DIR__ . '/../vendor/autoload.php';
 Type::addType(InetType::NAME, InetType::class);
 Type::addType(CidrType::NAME, CidrType::class);
 
-$conn = DriverManager::getConnection([
-    'url' => 'pgsql://postgres:T3cLgUr9KepiNmHXC9sBKs7b@localhost:2345/postgres'
-]);
+$dsnParser = new \Doctrine\DBAL\Tools\DsnParser(['pgsql' => 'pdo_pgsql']);
+$conn = DriverManager::getConnection(
+    $dsnParser->parse('pgsql://postgres:T3cLgUr9KepiNmHXC9sBKs7b@localhost:2345/postgres')
+);
 
 $platform = $conn->getDatabasePlatform();
 $platform->registerDoctrineTypeMapping(InetType::PG_TYPE, InetType::NAME);

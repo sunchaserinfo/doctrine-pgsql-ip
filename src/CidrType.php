@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace SunChaser\Doctrine\PgSql;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidType;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 use PhpIP\IPBlock;
@@ -27,7 +28,7 @@ final class CidrType extends Type
         try {
             return IPBlock::create($value);
         } catch (InvalidArgumentException $e) {
-            throw ConversionException::conversionFailed($value, $this->getName(), $e);
+            throw ValueNotConvertible::new($value, self::NAME, null, $e);
         }
     }
 
@@ -39,11 +40,7 @@ final class CidrType extends Type
         return match (true) {
             $value === null => null,
             $value instanceof IPBlock => $value->withPrefixLength(),
-            default => throw ConversionException::conversionFailedInvalidType(
-                $value,
-                $this->getName(),
-                ['null', IPBlock::class]
-            ),
+            default => throw InvalidType::new($value, self::NAME, ['null', IPBlock::class])
         };
     }
 
@@ -53,13 +50,5 @@ final class CidrType extends Type
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getDoctrineTypeMapping(self::PG_TYPE);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::NAME;
     }
 }
