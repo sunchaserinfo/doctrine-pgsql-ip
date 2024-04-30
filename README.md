@@ -45,6 +45,10 @@ Please check the type when retrieving the data.
 
 ## Upgrade
 
+Changes in 3.0:
+
+* Requirements were bumped to PHP 8.1 and Doctrine DBAL 4.0
+
 Changes in 2.0:
 
 * `leth/ip-address` was replaced with `rlanvin/php-ip`
