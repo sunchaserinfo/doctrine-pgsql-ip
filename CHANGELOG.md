@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.0.0
+
+* DBAL 4.0 is now supported/required (#3) thanks to @tcitworld
+* PHP 8.1 is now required because of DBAL
+
 ## 2.0.0
 
 * PHP 8.0 is now required
